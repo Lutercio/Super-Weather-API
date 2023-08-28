@@ -100,7 +100,7 @@ def get_weather(city):
     else:
         print("API_3 ERROR")
 
-    if response.status_code == 200 and weather_data[4]["days"][0]["temp"] > default_temp - margin and weather_data[4]["days"][0]["temp"] < default_temp - margin:
+    if response.status_code == 200 and weather_data[4]["days"][0]["temp"] > default_temp - margin and weather_data[4]["days"][0]["temp"] < default_temp + margin:
         temperature += weather_data[4]["days"][0]["temp"]
         apicount += 1
         print(weather_data[4]["days"][0]["temp"])
