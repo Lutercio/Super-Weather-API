@@ -6,7 +6,7 @@ import time
 app = Flask(__name__)
 
 # Keys of acess of the base APIs 
-keys = ["", "", "", "", "", ""] # Insert your API keys
+keys = ["", "", "", "", "", ""] # Put your keys here
 
 # Functions to "GET" requests of the base APIs
 def api0(lat, lng):
@@ -58,6 +58,11 @@ def get_weather(city):
     # Initializate some variables 
     apicount = 0
     temperature = 0
+    humidity = 0
+    feels_like = 0
+    main = ''
+    description = ''
+
 
     # Get the latitude and longitude of the city/place after the "get/" from google maps API
     location = requests.get(f"https://maps.googleapis.com/maps/api/geocode/json?address={city}&key={keys[0]}")
@@ -90,52 +95,30 @@ def get_weather(city):
     default_temp = weather_data[1]["current"]["temp"] # Use OpenWeather to compare with other APIs data
     margin = 3 # Define a margin
 
-    # Verify if the response of the APIs was successfully done and the data collected is on the defined margin
-    if response.status_code == 200 and weather_data[0]["current_weather"]["temperature"] > default_temp - margin and weather_data[0]["current_weather"]["temperature"] < default_temp + margin:
-        temperature += weather_data[0]["current_weather"]["temperature"] # Sum the temperature data
-        apicount += 1 # Add 1 to the API count
-        print(weather_data[0]["current_weather"]["temperature"]) # Print the data for debugging
-    else:
-        print("API_0 ERROR")
+    temp_data = [weather_data[0]["current_weather"]["temperature"], weather_data[1]["current"]["temp"], weather_data[2]["results"]["temp"], weather_data[3]["current"]["temp_c"], weather_data[4]["days"][0]["temp"], weather_data[5]["data"]["values"]["temperature"]]
 
-    if response.status_code == 200:
-        temperature += weather_data[1]["current"]["temp"]
-        apicount += 1
-        print(weather_data[1]["current"]["temp"])
-    else:
-        print("API_1 ERROR")
-
-    if response.status_code == 200 and weather_data[2]["results"]["temp"] > default_temp - margin and weather_data[2]["results"]["temp"] < default_temp + margin:
-        temperature += weather_data[2]["results"]["temp"]
-        apicount += 1
-        print(weather_data[2]["results"]["temp"])
-    else:
-        print("API_2 ERROR")
-
-    if response.status_code == 200 and weather_data[3]["current"]["temp_c"] > default_temp - margin and weather_data[3]["current"]["temp_c"] < default_temp + margin:
-        temperature += weather_data[3]["current"]["temp_c"]
-        apicount += 1
-        print(weather_data[3]["current"]["temp_c"])
-    else:
-        print("API_3 ERROR")
-
-    if response.status_code == 200 and weather_data[4]["days"][0]["temp"] > default_temp - margin and weather_data[4]["days"][0]["temp"] < default_temp + margin:
-        temperature += weather_data[4]["days"][0]["temp"]
-        apicount += 1
-        print(weather_data[4]["days"][0]["temp"])
-    else:
-        print("API_4 ERROR")
-
-    if response.status_code == 200 and weather_data[5]["data"]["values"]["temperature"] > default_temp - margin and weather_data[5]["data"]["values"]["temperature"] < default_temp + margin:
-        temperature += weather_data[5]["data"]["values"]["temperature"]
-        apicount += 1
-        print(weather_data[5]["data"]["values"]["temperature"])
-    else:
-        print("API_5 ERROR")
+    i = 0
+    while i < 6:
+        if temp_data[i] > default_temp - margin and temp_data[i] < default_temp + margin:
+            temperature += temp_data[i]
+            apicount += 1
+            print(temp_data[i])
+        else:
+            print(f"API{i} ERROR")
+        i += 1
 
     # Data that will be returned
     final_api = {
-        'temperature': temperature / apicount # Do a arithmetic average of the sum of all temperature data and the number of API data collected
+        'temperature': round(temperature / apicount, 2), # Do a arithmetic average of the sum of all temperature data and the number of API data collected
+        'local_time': weather_data[3]["location"]["localtime"],
+        'feels_like': 0,
+        'humidity': 0,
+        'clouds': 0,
+        'wind_speed': 0,
+        'weather':{
+            'main': weather_data[1]["current"]["weather"][0]["main"],
+            'description': weather_data[1]["current"]["weather"][0]["description"]
+        }
     }
 
     return jsonify(final_api), 200 # Return the JSON version of the "final_api" dict and the conection code 200
