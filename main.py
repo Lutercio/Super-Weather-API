@@ -6,7 +6,7 @@ import time
 app = Flask(__name__)
 
 # Keys of acess of the base APIs 
-keys = ["AIzaSyDPGWdhfrPDMa2xMXUen940TptcccgUZrA", "b8e9cc118639cd4491d6aae15fd2b57e", "", "fbdb034be5e345d5b51184535232608", "3LFSFM734XHLRFZTTJ6SM638L", "eLXXd2jxYZTWjb1muJyOzUVNKCYYR0w7"]
+keys = ["", "", "", "", "", ""]
 
 # Functions to "GET" requests of the base APIs
 def api0(lat, lng):
