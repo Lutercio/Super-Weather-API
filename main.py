@@ -97,9 +97,29 @@ def get_weather(city):
     default_wspeed = weather_data[1]["current"]["wind_speed"]
     margin = 3 # Define a margin
 
-    temp_data = [weather_data[0]["current_weather"]["temperature"], weather_data[1]["current"]["temp"], weather_data[2]["results"]["temp"], weather_data[3]["current"]["temp_c"], weather_data[4]["days"][0]["temp"], weather_data[5]["data"]["values"]["temperature"]]
-    flike_data = [weather_data[1]["current"]["feels_like"], weather_data[3]["current"]["feelslike_c"], weather_data[4]["days"][0]["feelslike"], weather_data[5]["data"]["values"]["temperatureApparent"]]
-    wspeed_data = [weather_data[0]["current_weather"]["windspeed"], weather_data[1]["current"]["wind_speed"], weather_data[3]["current"]["wind_kph"], weather_data[4]["days"][0]["windspeed"], weather_data[5]["data"]["values"]["windSpeed"]]
+    temp_data = [
+        weather_data[0]["current_weather"]["temperature"], 
+        weather_data[1]["current"]["temp"], 
+        weather_data[2]["results"]["temp"], 
+        weather_data[3]["current"]["temp_c"], 
+        weather_data[4]["days"][0]["temp"], 
+        weather_data[5]["data"]["values"]["temperature"]
+    ]
+
+    flike_data = [
+        weather_data[1]["current"]["feels_like"], 
+        weather_data[3]["current"]["feelslike_c"], 
+        weather_data[4]["days"][0]["feelslike"], 
+        weather_data[5]["data"]["values"]["temperatureApparent"]
+    ]
+
+    wspeed_data = [
+        weather_data[0]["current_weather"]["windspeed"], 
+        weather_data[1]["current"]["wind_speed"], 
+        weather_data[3]["current"]["wind_kph"], 
+        weather_data[4]["days"][0]["windspeed"], 
+        weather_data[5]["data"]["values"]["windSpeed"]
+    ]
 
     print("--------------------")
     print("Temperature")
