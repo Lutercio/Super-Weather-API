@@ -131,7 +131,7 @@ def get_weather(city):
             apicountT += 1
             print(temp_data[i])
         else:
-            print(f"API{i} T ERROR")
+            print(f"API{i} T ERROR ({temp_data[i]})")
         i += 1
 
     print("--------------------")
@@ -144,7 +144,7 @@ def get_weather(city):
             apicountFL += 1
             print(flike_data[i])
         else:
-            print(f"API{i} FL ERROR")
+            print(f"API{i} FL ERROR ({flike_data[i]})")
         i += 1
 
     print("--------------------")
@@ -157,7 +157,7 @@ def get_weather(city):
             apicountWS += 1
             print(wspeed_data[i])
         else:
-            print(f"API{i} WS ERROR")
+            print(f"API{i} WS ERROR ({wspeed_data[i]})")
         i += 1
 
 
