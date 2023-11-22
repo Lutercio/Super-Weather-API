@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, render_template, jsonify, request
 import requests
 import multiprocessing as mp
 import time
@@ -52,7 +52,7 @@ def api5(lat, lng):
     print(f"Pass5 in {conecttime} seconds")
     return response
 
-# Main function of my API
+# Main function of the API
 @app.route('/get/<city>')
 def get_weather(city):
     # Initializate some variables 
@@ -178,16 +178,17 @@ def get_weather(city):
 
     return jsonify(final_api), 200 # Return the JSON version of the "final_api" dict and the conection code 200
 
+@app.route('/get/')
+def get_html():
+    index_city = request.args.get("search")
+    return get_weather(index_city)
+
 # Main page
 @app.route('/')
 def home():
-    return "", 200
+    return render_template("index.html"), 200
 
 # Error 404 if the page is not found
 @app.errorhandler(404)
 def page_not_found(error):
-    return "<div class='error'><h1>Error 404</h1><p>Page not found<p></div><style>.error{display:grid;place-items:center;}</style>", 404
-
-# Run the app
-if __name__ == '__main__':
-    app.run(debug=True)
+    return render_template("404.html"), 404
