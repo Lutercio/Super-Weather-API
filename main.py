@@ -6,54 +6,48 @@ import time
 app = Flask(__name__)
 
 # Keys of acess of the base APIs 
-keys = ["", "", "", "", "", ""]
+keys = ["AIzaSyDPGWdhfrPDMa2xMXUen940TptcccgUZrA", "b8e9cc118639cd4491d6aae15fd2b57e", "", "fbdb034be5e345d5b51184535232608", "3LFSFM734XHLRFZTTJ6SM638L", "eLXXd2jxYZTWjb1muJyOzUVNKCYYR0w7"]
 
 # Functions to "GET" requests of the base APIs
 def api0(lat, lng):
     starttime = time.time()
     response = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,windspeed_10m")
     endtime = time.time()
-    conecttime = endtime - starttime
-    print(f"Pass0 in {conecttime} seconds")
+    print(f"Pass0 in {endtime - starttime} seconds")
     return response
 def api1(lat, lng):
     starttime = time.time()
     response = requests.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&units=metric&lang=pt_br&exclude=minutely,hourly,daily&appid={keys[1]}")
     endtime = time.time()
-    conecttime = endtime - starttime
-    print(f"Pass1 in {conecttime} seconds")
+    print(f"Pass1 in {endtime - starttime} seconds")
     return response
 def api2(lat, lng):
     starttime = time.time()
     response = requests.get(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lng}&user_ip=remote")
     endtime = time.time()
-    conecttime = endtime - starttime
-    print(f"Pass2 in {conecttime} seconds")
+    print(f"Pass2 in {endtime - starttime} seconds")
     return response
 def api3(lat, lng):
     starttime = time.time()
     response = requests.get(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lng}&aqi=no")
     endtime = time.time()
-    conecttime = endtime - starttime
-    print(f"Pass3 in {conecttime} seconds")
+    print(f"Pass3 in {endtime - starttime} seconds")
     return response
 def api4(lat, lng):
     starttime = time.time()
     response = requests.get(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lng}?unitGroup=metric&include=days&key={keys[4]}&contentType=json")
     endtime = time.time()
-    conecttime = endtime - starttime
-    print(f"Pass4 in {conecttime} seconds")
+    print(f"Pass4 in {endtime - starttime} seconds")
     return response
 def api5(lat, lng):
     starttime = time.time()
     response = requests.get(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lng}&apikey={keys[5]}")
     endtime = time.time()
-    conecttime = endtime - starttime
-    print(f"Pass5 in {conecttime} seconds")
+    print(f"Pass5 in {endtime - starttime} seconds")
     return response
 
 # Main function of the API
-@app.route('/get/<city>')
+@app.route('/get/?search=<city>')
 def get_weather(city):
     # Initializate some variables 
     apicountT = 0
@@ -181,7 +175,9 @@ def get_weather(city):
 @app.route('/get/')
 def get_html():
     index_city = request.args.get("search")
-    return get_weather(index_city)
+    if index_city != None:
+        return get_weather(index_city)
+    return home()
 
 # Main page
 @app.route('/')
