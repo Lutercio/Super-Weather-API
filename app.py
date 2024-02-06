@@ -108,14 +108,14 @@ def get_weather(city):
         weather_data[2]["results"]["temp"], 
         weather_data[3]["current"]["temp_c"], 
         weather_data[4]["days"][0]["temp"], 
-        #weather_data[5]["data"]["values"]["temperature"]
+        weather_data[5]["data"]["values"]["temperature"]
     ]
 
     flike_data = [
         weather_data[1]["current"]["feels_like"], 
         weather_data[3]["current"]["feelslike_c"], 
         weather_data[4]["days"][0]["feelslike"], 
-        #weather_data[5]["data"]["values"]["temperatureApparent"]
+        weather_data[5]["data"]["values"]["temperatureApparent"]
     ]
 
     wspeed_data = [
@@ -123,14 +123,14 @@ def get_weather(city):
         weather_data[1]["current"]["wind_speed"], 
         weather_data[3]["current"]["wind_kph"] / 3.6, 
         weather_data[4]["days"][0]["windspeed"] / 3.6, 
-        #weather_data[5]["data"]["values"]["windSpeed"]
+        weather_data[5]["data"]["values"]["windSpeed"]
     ]
 
     print("--------------------")
     print("Temperature")
 
     i = 0
-    while i < 5:
+    while i < len(temp_data):
         if temp_data[i] > default_temp - margin and temp_data[i] < default_temp + margin:
             temperature += temp_data[i]
             apicountT += 1
@@ -143,7 +143,7 @@ def get_weather(city):
     print("Feels Like")
 
     i = 0
-    while i < 3:
+    while i < len(flike_data):
         if flike_data[i] > default_flike - margin and flike_data[i] < default_flike + margin:
             feels_like += flike_data[i]
             apicountFL += 1
@@ -156,7 +156,7 @@ def get_weather(city):
     print("Wind Speed")
     
     i = 0
-    while i < 4:
+    while i < len(wspeed_data):
         if wspeed_data[i] > default_wspeed - margin and wspeed_data[i] < default_wspeed + margin:
             wind_speed += wspeed_data[i]
             apicountWS += 1
