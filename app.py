@@ -67,7 +67,10 @@ def get_weather(city):
     loc = location.json()
     print(f"https://nominatim.openstreetmap.org/search?q={city}&format=json")
     print(json.dumps(loc, indent=2))
-    lat = loc[0]["lat"]
+    try:
+        lat = loc[0]["lat"]
+    except:
+        return jsonify({'message': "NOT_FOUND"}), 400
     lng = loc[0]["lon"]
     print(lat, lng)
 
