@@ -7,6 +7,7 @@ import json
 
 app = Flask(__name__)
 CORS(app)
+app.json.sort_keys = False
 
 # Keys of acess of the base APIs 
 keys = ["AIzaSyDPGWdhfrPDMa2xMXUen940TptcccgUZrA", "b8e9cc118639cd4491d6aae15fd2b57e", "", "fbdb034be5e345d5b51184535232608", "3LFSFM734XHLRFZTTJ6SM638L", "eLXXd2jxYZTWjb1muJyOzUVNKCYYR0w7"]
@@ -174,19 +175,19 @@ def get_weather(city):
                 'adresstype': loc[0]["addresstype"],
                 'name': weather_data[3]["location"]["name"],
                 'region': weather_data[3]["location"]["region"],
-                'country': weather_data[3]["location"]["country"]
+                'country': weather_data[3]["location"]["country"],
+                'local_time': weather_data[3]["location"]["localtime"],
+                'timezone': weather_data[1]["timezone"],
+                'dt': weather_data[1]["current"]["dt"]
         },
         'current': {
             'temperature': round(temperature / apicountT, 2), # Do a arithmetic average of the sum of all temperature data and the number of API data collected
-            'local_time': weather_data[3]["location"]["localtime"],
-            'timezone': weather_data[1]["timezone"],
-            'dt': weather_data[1]["current"]["dt"],
+            'feels_like': round(feels_like / apicountFL, 2),
+            'wind_speed': round(wind_speed / apicountWS, 2),
             'sunrise': weather_data[1]["current"]["sunrise"],
             'sunset': weather_data[1]["current"]["sunset"],
-            'feels_like': round(feels_like / apicountFL, 2),
             'humidity': weather_data[1]["current"]["humidity"],
             'clouds': weather_data[1]["current"]["clouds"],
-            'wind_speed': round(wind_speed / apicountWS, 2),
             'weather':{
                 'id': weather_data[1]["current"]["weather"][0]["id"],
                 'main': weather_data[1]["current"]["weather"][0]["main"],
