@@ -20,7 +20,7 @@ def api0(lat, lng):
     return response
 def api1(lat, lng):
     starttime = time.time()
-    response = requests.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&units=metric&lang=pt_br&exclude=minutely,hourly,daily&appid={keys[1]}")
+    response = requests.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&units=metric&lang=pt_br&exclude=minutely,hourly&appid={keys[1]}")
     endtime = time.time()
     print(f"Pass1 in {endtime - starttime} seconds")
     return response
@@ -110,14 +110,14 @@ def get_weather(city):
         weather_data[2]["results"]["temp"], 
         weather_data[3]["current"]["temp_c"], 
         weather_data[4]["days"][0]["temp"], 
-        weather_data[5]["data"]["values"]["temperature"]
+        #weather_data[5]["data"]["values"]["temperature"]
     ]
 
     flike_data = [
         weather_data[1]["current"]["feels_like"], 
         weather_data[3]["current"]["feelslike_c"], 
         weather_data[4]["days"][0]["feelslike"], 
-        weather_data[5]["data"]["values"]["temperatureApparent"]
+        #weather_data[5]["data"]["values"]["temperatureApparent"]
     ]
 
     wspeed_data = [
@@ -125,7 +125,7 @@ def get_weather(city):
         weather_data[1]["current"]["wind_speed"], 
         weather_data[3]["current"]["wind_kph"] / 3.6, 
         weather_data[4]["days"][0]["windspeed"] / 3.6, 
-        weather_data[5]["data"]["values"]["windSpeed"]
+        #weather_data[5]["data"]["values"]["windSpeed"]
     ]
 
     print("--------------------")
@@ -170,28 +170,38 @@ def get_weather(city):
 
     # Data that will be returned
     final_api = {
-        'temperature': round(temperature / apicountT, 2), # Do a arithmetic average of the sum of all temperature data and the number of API data collected
-        'location':{
-            'adresstype': loc[0]["addresstype"],
-            'name': weather_data[3]["location"]["name"],
-            'region': weather_data[3]["location"]["region"],
-            'country': weather_data[3]["location"]["country"]
+        'location': {
+                'adresstype': loc[0]["addresstype"],
+                'name': weather_data[3]["location"]["name"],
+                'region': weather_data[3]["location"]["region"],
+                'country': weather_data[3]["location"]["country"]
         },
-        'local_time': weather_data[3]["location"]["localtime"],
-        'timezone': weather_data[1]["timezone"],
-        'dt': weather_data[1]["current"]["dt"],
-        'sunrise': weather_data[1]["current"]["sunrise"],
-        'sunset': weather_data[1]["current"]["sunset"],
-        'feels_like': round(feels_like / apicountFL, 2),
-        'humidity': weather_data[1]["current"]["humidity"],
-        'clouds': weather_data[1]["current"]["clouds"],
-        'wind_speed': round(wind_speed / apicountWS, 2),
-        'weather':{
-            'id': weather_data[1]["current"]["weather"][0]["id"],
-            'main': weather_data[1]["current"]["weather"][0]["main"],
-            'description': weather_data[1]["current"]["weather"][0]["description"]
-        }
+        'current': {
+            'temperature': round(temperature / apicountT, 2), # Do a arithmetic average of the sum of all temperature data and the number of API data collected
+            'local_time': weather_data[3]["location"]["localtime"],
+            'timezone': weather_data[1]["timezone"],
+            'dt': weather_data[1]["current"]["dt"],
+            'sunrise': weather_data[1]["current"]["sunrise"],
+            'sunset': weather_data[1]["current"]["sunset"],
+            'feels_like': round(feels_like / apicountFL, 2),
+            'humidity': weather_data[1]["current"]["humidity"],
+            'clouds': weather_data[1]["current"]["clouds"],
+            'wind_speed': round(wind_speed / apicountWS, 2),
+            'weather':{
+                'id': weather_data[1]["current"]["weather"][0]["id"],
+                'main': weather_data[1]["current"]["weather"][0]["main"],
+                'description': weather_data[1]["current"]["weather"][0]["description"]
+            }
+        },
+        'daily': []
     }
+
+    for daily_data in weather_data[1]["daily"]:
+        final_api["daily"].append({
+            'dt': daily_data["dt"],
+            'sunrise': daily_data["sunrise"],
+            'sunset': daily_data["sunset"]
+    })
 
     return jsonify(final_api), 200 # Return the JSON version of the "final_api" dict and the conection code 200
 
