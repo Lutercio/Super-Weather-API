@@ -15,7 +15,7 @@ keys = ["AIzaSyDPGWdhfrPDMa2xMXUen940TptcccgUZrA", "b8e9cc118639cd4491d6aae15fd2
 # Functions to "GET" requests of the base APIs
 def api0(lat, lng):
     starttime = time.time()
-    response = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,windspeed_10m")
+    response = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true")
     endtime = time.time()
     print(f"Pass0 in {endtime - starttime} seconds")
     return response
@@ -57,6 +57,7 @@ def get_weather(city):
     apicountT = 0
     apicountFL = 0
     apicountWS = 0
+    apicountH = 0
     temperature = 0
     humidity = 0
     feels_like = 0
@@ -96,8 +97,8 @@ def get_weather(city):
             print("API ERROR")
 
     #debug
-    print(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,windspeed_10m")
-    print(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&units=metric&lang=pt_br&exclude=minutely,hourly,daily&appid={keys[1]}")
+    print(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true")
+    print(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&units=metric&lang=pt_br&exclude=minutely,hourly&appid={keys[1]}")
     print(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lng}&user_ip=remote")
     print(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lng}&aqi=no")
     print(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lng}?unitGroup=metric&include=days&key={keys[4]}&contentType=json")
@@ -106,6 +107,7 @@ def get_weather(city):
     default_temp = weather_data[1]["current"]["temp"] # Use OpenWeather to compare with other APIs data
     default_flike = weather_data[1]["current"]["feels_like"]
     default_wspeed = weather_data[1]["current"]["wind_speed"]
+    default_humidity = weather_data[1]["current"]["humidity"]
     margin = 3 # Define a margin
 
     temp_data = [
@@ -132,6 +134,14 @@ def get_weather(city):
         #weather_data[5]["data"]["values"]["windSpeed"]
     ]
 
+    humidity_data = [
+        weather_data[1]["current"]["humidity"],
+        weather_data[2]["results"]["humidity"],
+        weather_data[3]["current"]["humidity"],
+        weather_data[4]["days"][0]["humidity"],
+        #weather_data[5]["data"]["values"]["humidity"]
+    ]
+
     print("--------------------")
     print("Temperature")
 
@@ -142,7 +152,7 @@ def get_weather(city):
             apicountT += 1
             print(temp_data[i])
         else:
-            print(f"API{i} T ERROR ({temp_data[i]})")
+            print(f"API{i} T FAIL ({temp_data[i]})")
         i += 1
 
     print("--------------------")
@@ -155,7 +165,7 @@ def get_weather(city):
             apicountFL += 1
             print(flike_data[i])
         else:
-            print(f"API{i} FL ERROR ({flike_data[i]})")
+            print(f"API{i} FL FAIL ({flike_data[i]})")
         i += 1
 
     print("--------------------")
@@ -166,9 +176,22 @@ def get_weather(city):
         if wspeed_data[i] > default_wspeed - margin and wspeed_data[i] < default_wspeed + margin:
             wind_speed += wspeed_data[i]
             apicountWS += 1
-            print(wspeed_data[i])
+            print(round(wspeed_data[i], 2))
         else:
-            print(f"API{i} WS ERROR ({wspeed_data[i]})")
+            print(f"API{i} WS FAIL ({round(wspeed_data[i], 2)})")
+        i += 1
+
+    print("--------------------")
+    print("Humidity")
+    
+    i = 0
+    while i < len(humidity_data):
+        if humidity_data[i] > default_humidity - margin * 3 and humidity_data[i] < default_humidity + margin * 3:
+            humidity += humidity_data[i]
+            apicountH += 1
+            print(humidity_data[i])
+        else:
+            print(f"API{i} H FAIL ({humidity_data[i]})")
         i += 1
 
 
@@ -189,7 +212,7 @@ def get_weather(city):
             'wind_speed': round(wind_speed / apicountWS, 2),
             'sunrise': weather_data[1]["current"]["sunrise"],
             'sunset': weather_data[1]["current"]["sunset"],
-            'humidity': weather_data[1]["current"]["humidity"],
+            'humidity': round(humidity / apicountH, 2),
             'clouds': weather_data[1]["current"]["clouds"],
             'weather':{
                 'id': weather_data[1]["current"]["weather"][0]["id"],
@@ -204,7 +227,19 @@ def get_weather(city):
         final_api["daily"].append({
             'dt': daily_data["dt"],
             'sunrise': daily_data["sunrise"],
-            'sunset': daily_data["sunset"]
+            'sunset': daily_data["sunset"],
+            'temperature': {
+                'min': daily_data["temp"]["min"],
+                'max': daily_data["temp"]["max"]
+            },
+            'humidity': daily_data["humidity"],
+            'wind_speed': daily_data["wind_speed"],
+            'weather': {
+                'id': daily_data["weather"][0]["id"],
+                'main': daily_data["weather"][0]["main"],
+                'description': daily_data["weather"][0]["description"],
+                'icon': daily_data["weather"][0]["icon"]
+            }
     })
 
     return jsonify(final_api), 200 # Return the JSON version of the "final_api" dict and the conection code 200
