@@ -269,7 +269,7 @@ def get_ip():
         'country': location_data["country"]
     }
 
-    return jsonify(ip_data)
+    return jsonify(ip_log)
 
 # Main page
 @app.route('/')
