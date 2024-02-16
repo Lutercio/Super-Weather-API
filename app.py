@@ -263,7 +263,7 @@ def get_ip():
     location_response = requests.get(f"http://ip-api.com/json/{ip_address}")
     location_data = location_response.json()
 
-    ip_data = {
+    ip_log = {
         'city': location_data["city"],
         'region': location_data["region"],
         'country': location_data["country"]
