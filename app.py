@@ -251,6 +251,23 @@ def get_html():
         return get_weather(index_city)
     return home()
 
+@app.route("/ip")
+def get_ip():
+    ip_response = requests.get("https://api64.ipify.org/?format=json")
+    ip_data = ip_response.json()
+    ip_address = ip_data["ip"]
+
+    location_response = requests.get(f"http://ip-api.com/json/{ip_address}")
+    location_data = location_response.json()
+
+    ip_data = {
+        'city': location_data["city"],
+        'region': location_data["region"],
+        'country': location_data["country"]
+    }
+
+    return jsonify(ip_data)
+
 # Main page
 @app.route('/')
 def home():
