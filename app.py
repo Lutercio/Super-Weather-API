@@ -120,14 +120,14 @@ def get_weather(city):
         weather_data[2]["results"]["temp"], 
         weather_data[3]["current"]["temp_c"], 
         weather_data[4]["days"][0]["temp"], 
-        #weather_data[5]["data"]["values"]["temperature"]
+        weather_data[5]["data"]["values"]["temperature"]
     ]
 
     flike_data = [
         weather_data[1]["current"]["feels_like"], 
         weather_data[3]["current"]["feelslike_c"], 
         weather_data[4]["days"][0]["feelslike"], 
-        #weather_data[5]["data"]["values"]["temperatureApparent"]
+        weather_data[5]["data"]["values"]["temperatureApparent"]
     ]
 
     wspeed_data = [
@@ -135,7 +135,7 @@ def get_weather(city):
         weather_data[1]["current"]["wind_speed"], 
         weather_data[3]["current"]["wind_kph"] / 3.6, 
         weather_data[4]["days"][0]["windspeed"] / 3.6, 
-        #weather_data[5]["data"]["values"]["windSpeed"]
+        weather_data[5]["data"]["values"]["windSpeed"]
     ]
 
     humidity_data = [
@@ -143,7 +143,7 @@ def get_weather(city):
         weather_data[2]["results"]["humidity"],
         weather_data[3]["current"]["humidity"],
         weather_data[4]["days"][0]["humidity"],
-        #weather_data[5]["data"]["values"]["humidity"]
+        weather_data[5]["data"]["values"]["humidity"]
     ]
 
     print("--------------------")
