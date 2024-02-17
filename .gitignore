@@ -1,2 +1,7 @@
 *.env
+env
+.dockerignore
+Dockerfile
+.gcloudignore
+app.yaml
 __pycache__/
