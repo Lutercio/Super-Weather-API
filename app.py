@@ -114,56 +114,111 @@ def get_weather(city):
     default_humidity = weather_data[1]["current"]["humidity"]
     margin = 3 # Define a margin
 
+    #Collect the data into some matrizes with an Error Handler in case of Error
     temp_data = []
-
-    try:
-        temp_data.append(weather_data[0]["current_weather"]["temperature"])
-    except:
-        None
-    try:
-        temp_data.append(weather_data[1]["current"]["temp"])
-    except:
-        None
-    try:
-        temp_data.append(weather_data[2]["results"]["temp"])
-    except:
-        None
-    try:
-        temp_data.append(weather_data[3]["current"]["temp_c"])
-    except:
-        None
-    try:
-        temp_data.append(weather_data[4]["days"][0]["temp"])
-    except:
-        None
-    try:
-        temp_data.append(weather_data[5]["data"]["values"]["temperature"])
-    except:
-        None
-
-    flike_data = [
-        weather_data[1]["current"]["feels_like"], 
-        weather_data[3]["current"]["feelslike_c"], 
-        weather_data[4]["days"][0]["feelslike"], 
-        weather_data[5]["data"]["values"]["temperatureApparent"]
+    temp_index = [
+        [0,"current_weather", "temperature"],
+        [1,"current", "temp"],
+        [2,"results", "temp"],
+        [3,"current", "temp_c"],
+        [4,"days", 0, "temp"],
+        [5,"data", "values", "temperature"]
     ]
 
-    wspeed_data = [
-        weather_data[0]["current_weather"]["windspeed"] / 3.6, 
-        weather_data[1]["current"]["wind_speed"], 
-        weather_data[3]["current"]["wind_kph"] / 3.6, 
-        weather_data[4]["days"][0]["windspeed"] / 3.6, 
-        weather_data[5]["data"]["values"]["windSpeed"]
+    i = 0
+    while i < len(temp_index):
+        if len(temp_index[i]) == 3:
+            try:
+                temp_data.append(weather_data[temp_index[i][0]][temp_index[i][1]][temp_index[i][2]])
+            except:
+                None
+        else:
+            try:
+                temp_data.append(weather_data[temp_index[i][0]][temp_index[i][1]][temp_index[i][2]][temp_index[i][3]])
+            except:
+                None
+        i += 1
+
+    flike_data = []
+    flike_index = [
+        [1, "current", "feels_like"],
+        [3, "current", "feelslike_c"],
+        [4, "days", 0, "feelslike"],
+        [5, "data", "values", "temperatureApparent"]
     ]
 
-    humidity_data = [
-        weather_data[1]["current"]["humidity"],
-        weather_data[2]["results"]["humidity"],
-        weather_data[3]["current"]["humidity"],
-        weather_data[4]["days"][0]["humidity"],
-        weather_data[5]["data"]["values"]["humidity"]
+    i = 0
+    while i < len(flike_index):
+        if len(flike_index[i]) == 3:
+            try:
+                flike_data.append(weather_data[flike_index[i][0]][flike_index[i][1]][flike_index[i][2]])
+            except:
+                None
+        else:
+            try:
+                flike_data.append(weather_data[flike_index[i][0]][flike_index[i][1]][flike_index[i][2]][flike_index[i][3]])
+            except:
+                None
+        i += 1
+
+    wspeed_data = []
+    wspeed_index = [
+        [0, "current_weather", "windspeed", "kmph"],
+        [1, "current", "wind_speed"],
+        [3, "current", "wind_kph", "kmph"],
+        [4, "days", 0, "windspeed", "kmph"],
+        [5, "data", "values", "windSpeed"]
     ]
 
+    i = 0
+    while i < len(wspeed_index):
+        if "kmph" in wspeed_index[i]:
+            if len(wspeed_index[i]) == 4:
+                try:
+                    wspeed_data.append(weather_data[wspeed_index[i][0]][wspeed_index[i][1]][wspeed_index[i][2]] / 3.6)
+                except:
+                    None
+            else:
+                try:
+                    wspeed_data.append(weather_data[wspeed_index[i][0]][wspeed_index[i][1]][wspeed_index[i][2]][wspeed_index[i][3]] / 3.6)
+                except:
+                    None
+        elif len(wspeed_index[i]) == 3:
+            try:
+                wspeed_data.append(weather_data[wspeed_index[i][0]][wspeed_index[i][1]][wspeed_index[i][2]])
+            except:
+                None
+        else:
+            try:
+                wspeed_data.append(weather_data[wspeed_index[i][0]][wspeed_index[i][1]][wspeed_index[i][2]][wspeed_index[i][3]])
+            except:
+                None
+        i += 1
+
+    humidity_data = []
+    humidity_index = [
+        [1, "current", "humidity"],
+        [2, "results", "humidity"],
+        [3, "current", "humidity"],
+        [4, "days", 0, "humidity"],
+        [5, "data", "values", "humidity"]
+    ]
+
+    i = 0
+    while i < len(humidity_index):
+        if len(humidity_index[i]) == 3:
+            try:
+                humidity_data.append(weather_data[humidity_index[i][0]][humidity_index[i][1]][humidity_index[i][2]])
+            except:
+                None
+        else:
+            try:
+                humidity_data.append(weather_data[humidity_index[i][0]][humidity_index[i][1]][humidity_index[i][2]][humidity_index[i][3]])
+            except:
+                None
+        i += 1
+
+    #Compare the data with a margin and print them for debug
     print("--------------------")
     print("Temperature")
 
