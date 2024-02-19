@@ -14,7 +14,7 @@ CORS(app)
 app.json.sort_keys = False
 
 # Keys of acess of the base APIs
-keys = [os.getenv(f"KEY_{i}") for i in range(6)]
+keys = ["AIzaSyDPGWdhfrPDMa2xMXUen940TptcccgUZrA", "b8e9cc118639cd4491d6aae15fd2b57e", "", "fbdb034be5e345d5b51184535232608", "3LFSFM734XHLRFZTTJ6SM638L", "eLXXd2jxYZTWjb1muJyOzUVNKCYYR0w7"]
 
 # Functions to "GET" requests of the base APIs
 def api0(lat, lng):
@@ -114,14 +114,32 @@ def get_weather(city):
     default_humidity = weather_data[1]["current"]["humidity"]
     margin = 3 # Define a margin
 
-    temp_data = [
-        weather_data[0]["current_weather"]["temperature"], 
-        weather_data[1]["current"]["temp"], 
-        weather_data[2]["results"]["temp"], 
-        weather_data[3]["current"]["temp_c"], 
-        weather_data[4]["days"][0]["temp"], 
-        weather_data[5]["data"]["values"]["temperature"]
-    ]
+    temp_data = []
+
+    try:
+        temp_data.append(weather_data[0]["current_weather"]["temperature"])
+    except:
+        None
+    try:
+        temp_data.append(weather_data[1]["current"]["temp"])
+    except:
+        None
+    try:
+        temp_data.append(weather_data[2]["results"]["temp"])
+    except:
+        None
+    try:
+        temp_data.append(weather_data[3]["current"]["temp_c"])
+    except:
+        None
+    try:
+        temp_data.append(weather_data[4]["days"][0]["temp"])
+    except:
+        None
+    try:
+        temp_data.append(weather_data[5]["data"]["values"]["temperature"])
+    except:
+        None
 
     flike_data = [
         weather_data[1]["current"]["feels_like"], 
