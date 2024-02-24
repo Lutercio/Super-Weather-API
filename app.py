@@ -21,17 +21,17 @@ timeout = 10
 def api0(lat, lng):
     with requests.Session() as session:
         starttime = time.time()
-        response = session.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true", timeout=timeout)
+        response = session.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&units=metric&lang=pt_br&exclude=minutely,hourly&appid={keys[1]}")
         endtime = time.time()
-    print(f"api0 - Connection time: {endtime - starttime} seconds")
+    print(f"api1 - Connection time: {endtime - starttime} seconds")
     return response
 
 def api1(lat, lng):
     with requests.Session() as session:
         starttime = time.time()
-        response = session.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&units=metric&lang=pt_br&exclude=minutely,hourly&appid={keys[1]}")
+        response = session.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true", timeout=timeout)
         endtime = time.time()
-    print(f"api1 - Connection time: {endtime - starttime} seconds")
+    print(f"api0 - Connection time: {endtime - starttime} seconds")
     return response
 
 def api2(lat, lng):
@@ -129,23 +129,17 @@ def get_weather(city):
     print(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lng}?unitGroup=metric&include=days&key={keys[4]}&contentType=json")
     print(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lng}&apikey={keys[5]}")
     
-    i = 0
-    while i < 1:
-        try:
-            default_temp = weather_data[i]["current"]["temp"] # Use OpenWeather to compare with other APIs data
-            default_flike = weather_data[i]["current"]["feels_like"]
-            default_wspeed = weather_data[i]["current"]["wind_speed"]
-            default_humidity = weather_data[i]["current"]["humidity"]
-        except:
-            None
-        i += 1
+    default_temp = weather_data[0]["current"]["temp"] # Use OpenWeather to compare with other APIs data
+    default_flike = weather_data[0]["current"]["feels_like"]
+    default_wspeed = weather_data[0]["current"]["wind_speed"]
+    default_humidity = weather_data[0]["current"]["humidity"]
     margin = 3 # Define a margin
 
     #Collect the data into some matrizes with an Error Handler in case of Error
     temp_data = []
     temp_index = [
-        [0,"current_weather", "temperature"],
-        [1,"current", "temp"],
+        [0,"current", "temp"],
+        [1,"current_weather", "temperature"],
         [2,"results", "temp"],
         [3,"current", "temp_c"],
         [4,"days", 0, "temp"],
@@ -168,7 +162,7 @@ def get_weather(city):
 
     flike_data = []
     flike_index = [
-        [1, "current", "feels_like"],
+        [0, "current", "feels_like"],
         [3, "current", "feelslike_c"],
         [4, "days", 0, "feelslike"],
         [5, "data", "values", "temperatureApparent"]
@@ -190,8 +184,8 @@ def get_weather(city):
 
     wspeed_data = []
     wspeed_index = [
-        [0, "current_weather", "windspeed", "kmph"],
-        [1, "current", "wind_speed"],
+        [0, "current", "wind_speed"],
+        [1, "current_weather", "windspeed", "kmph"],
         [3, "current", "wind_kph", "kmph"],
         [4, "days", 0, "windspeed", "kmph"],
         [5, "data", "values", "windSpeed"]
@@ -224,7 +218,7 @@ def get_weather(city):
 
     humidity_data = []
     humidity_index = [
-        [1, "current", "humidity"],
+        [0, "current", "humidity"],
         [2, "results", "humidity"],
         [3, "current", "humidity"],
         [4, "days", 0, "humidity"],
@@ -302,32 +296,32 @@ def get_weather(city):
     # Data that will be returned
     final_api = {
         'location': {
-                'adresstype': loc[0]["addresstype"],
+                'adresstype': loc[1]["addresstype"],
                 'name': weather_data[3]["location"]["name"],
                 'region': weather_data[3]["location"]["region"],
                 'country': weather_data[3]["location"]["country"],
                 'local_time': weather_data[3]["location"]["localtime"],
                 'timezone': weather_data[1]["timezone"],
-                'dt': weather_data[1]["current"]["dt"]
+                'dt': weather_data[0]["current"]["dt"]
         },
         'current': {
             'temperature': round(temperature / apicountT, 2), # Do a arithmetic average of the sum of all temperature data and the number of API data collected
             'feels_like': round(feels_like / apicountFL, 2),
             'wind_speed': round(wind_speed / apicountWS, 2),
-            'sunrise': weather_data[1]["current"]["sunrise"],
-            'sunset': weather_data[1]["current"]["sunset"],
+            'sunrise': weather_data[0]["current"]["sunrise"],
+            'sunset': weather_data[0]["current"]["sunset"],
             'humidity': round(humidity / apicountH, 2),
-            'clouds': weather_data[1]["current"]["clouds"],
+            'clouds': weather_data[0]["current"]["clouds"],
             'weather':{
-                'id': weather_data[1]["current"]["weather"][0]["id"],
-                'main': weather_data[1]["current"]["weather"][0]["main"],
-                'description': weather_data[1]["current"]["weather"][0]["description"]
+                'id': weather_data[0]["current"]["weather"][0]["id"],
+                'main': weather_data[0]["current"]["weather"][0]["main"],
+                'description': weather_data[0]["current"]["weather"][0]["description"]
             }
         },
         'daily': []
     }
 
-    for daily_data in weather_data[1]["daily"]:
+    for daily_data in weather_data[0]["daily"]:
         final_api["daily"].append({
             'dt': daily_data["dt"],
             'sunrise': daily_data["sunrise"],
