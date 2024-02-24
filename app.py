@@ -130,12 +130,12 @@ def get_weather(city):
     print(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lng}&apikey={keys[5]}")
     
     i = 0
-    while i < 5:
+    while i < 1:
         try:
-            default_temp = weather_data[1]["current"]["temp"] # Use OpenWeather to compare with other APIs data
-            default_flike = weather_data[1]["current"]["feels_like"]
-            default_wspeed = weather_data[1]["current"]["wind_speed"]
-            default_humidity = weather_data[1]["current"]["humidity"]
+            default_temp = weather_data[i]["current"]["temp"] # Use OpenWeather to compare with other APIs data
+            default_flike = weather_data[i]["current"]["feels_like"]
+            default_wspeed = weather_data[i]["current"]["wind_speed"]
+            default_humidity = weather_data[i]["current"]["humidity"]
         except:
             None
         i += 1
