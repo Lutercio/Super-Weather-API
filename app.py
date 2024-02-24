@@ -15,44 +15,57 @@ app.json.sort_keys = False
 
 # Keys of acess of the base APIs
 keys = [os.getenv(f"KEY_{i}") for i in range(6)]
+timeout = 10
 
 # Functions to "GET" requests of the base APIs
 def api0(lat, lng):
-    starttime = time.time()
-    response = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true")
-    endtime = time.time()
-    print(f"Pass0 in {endtime - starttime} seconds")
+    with requests.Session() as session:
+        starttime = time.time()
+        response = session.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true", timeout=timeout)
+        endtime = time.time()
+    print(f"api0 - Connection time: {endtime - starttime} seconds")
     return response
+
 def api1(lat, lng):
-    starttime = time.time()
-    response = requests.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&units=metric&lang=pt_br&exclude=minutely,hourly&appid={keys[1]}")
-    endtime = time.time()
-    print(f"Pass1 in {endtime - starttime} seconds")
+    with requests.Session() as session:
+        starttime = time.time()
+        response = session.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&units=metric&lang=pt_br&exclude=minutely,hourly&appid={keys[1]}")
+        endtime = time.time()
+    print(f"api1 - Connection time: {endtime - starttime} seconds")
     return response
+
 def api2(lat, lng):
-    starttime = time.time()
-    response = requests.get(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lng}&user_ip=remote")
-    endtime = time.time()
-    print(f"Pass2 in {endtime - starttime} seconds")
+    with requests.Session() as session:
+        starttime = time.time()
+        response = session.get(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lng}&user_ip=remote", timeout=timeout)
+        endtime = time.time()
+    print(f"api2 - Connection time: {endtime - starttime} seconds")
     return response
+
 def api3(lat, lng):
-    starttime = time.time()
-    response = requests.get(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lng}&aqi=no")
-    endtime = time.time()
-    print(f"Pass3 in {endtime - starttime} seconds")
+    with requests.Session() as session:
+        starttime = time.time()
+        response = session.get(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lng}&aqi=no", timeout=timeout)
+        endtime = time.time()
+    print(f"api3 - Connection time: {endtime - starttime} seconds")
     return response
+
 def api4(lat, lng):
-    starttime = time.time()
-    response = requests.get(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lng}?unitGroup=metric&include=days&key={keys[4]}&contentType=json")
-    endtime = time.time()
-    print(f"Pass4 in {endtime - starttime} seconds")
+    with requests.Session() as session:
+        starttime = time.time()
+        response = session.get(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lng}?unitGroup=metric&include=days&key={keys[4]}&contentType=json", timeout=timeout)
+        endtime = time.time()
+    print(f"api4 - Connection time: {endtime - starttime} seconds")
     return response
+
 def api5(lat, lng):
-    starttime = time.time()
-    response = requests.get(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lng}&apikey={keys[5]}")
-    endtime = time.time()
-    print(f"Pass5 in {endtime - starttime} seconds")
+    with requests.Session() as session:
+        starttime = time.time()
+        response = session.get(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lng}&apikey={keys[5]}", timeout=timeout)
+        endtime = time.time()
+    print(f"api5 - Connection time: {endtime - starttime} seconds")
     return response
+
 
 # Main function of the API
 @app.route('/get/?search=<city>')
@@ -88,7 +101,15 @@ def get_weather(city):
             process = pool.apply_async(api_func, args=(lat, lng)) # Create the process to run any "api" funtion
             processes.append(process) # Append the function to the "processes" array
 
-        responses = [process.get() for process in processes] # Use the "GET" method for each element in the "processes" array
+        # Use the "GET" method for each element in the "processes" array
+        responses = []
+        for process in processes:
+            try:
+                response = process.get(timeout=timeout)
+                if response is not None:
+                    responses.append(response)
+            except Exception as e:
+                print(f"Error getting response: {e}")
 
     weather_data = []   # Create the weather data array as empty
 
@@ -102,16 +123,22 @@ def get_weather(city):
 
     #debug
     print(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true")
-    print(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&units=metric&lang=pt_br&exclude=minutely,hourly&appid={keys[1]}")
+    print(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&exclude=minutely,hourly&units=metric&appid=a855b02b7c3ea7131dc80891d98100fb")
     print(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lng}&user_ip=remote")
     print(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lng}&aqi=no")
     print(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lng}?unitGroup=metric&include=days&key={keys[4]}&contentType=json")
     print(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lng}&apikey={keys[5]}")
     
-    default_temp = weather_data[1]["current"]["temp"] # Use OpenWeather to compare with other APIs data
-    default_flike = weather_data[1]["current"]["feels_like"]
-    default_wspeed = weather_data[1]["current"]["wind_speed"]
-    default_humidity = weather_data[1]["current"]["humidity"]
+    i = 0
+    while i < 1:
+        try:
+            default_temp = weather_data[i]["current"]["temp"] # Use OpenWeather to compare with other APIs data
+            default_flike = weather_data[i]["current"]["feels_like"]
+            default_wspeed = weather_data[i]["current"]["wind_speed"]
+            default_humidity = weather_data[i]["current"]["humidity"]
+        except:
+            None
+        i += 1
     margin = 3 # Define a margin
 
     #Collect the data into some matrizes with an Error Handler in case of Error
