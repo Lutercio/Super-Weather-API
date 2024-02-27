@@ -15,7 +15,7 @@ app.json.sort_keys = False
 
 # Keys of acess of the base APIs
 keys = [os.getenv(f"KEY_{i}") for i in range(6)]
-timeout = 10
+timeout = 5
 
 # Functions to "GET" requests of the base APIs
 def api0(lat, lng):
@@ -105,9 +105,11 @@ def get_weather(city):
         responses = []
         for process in processes:
             try:
-                response = process.get(timeout=timeout)
-                if response is not None:
-                    responses.append(response)
+                if process == processes[0]:
+                    response = process.get()
+                else:
+                    response = process.get(timeout=timeout)
+                responses.append(response)
             except Exception as e:
                 print(f"Error getting response: {e}")
 
@@ -296,7 +298,7 @@ def get_weather(city):
     # Data that will be returned
     final_api = {
         'location': {
-                'adresstype': loc[1]["addresstype"],
+                'adresstype': loc[0]["addresstype"],
                 'name': weather_data[3]["location"]["name"],
                 'region': weather_data[3]["location"]["region"],
                 'country': weather_data[3]["location"]["country"],
