@@ -23,7 +23,15 @@ def api0(lat, lng):
         starttime = time.time()
         response = session.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&units=metric&lang=pt_br&exclude=minutely,hourly&appid={keys[1]}")
         endtime = time.time()
-    print(f"api1 - Connection time: {endtime - starttime} seconds")
+    print(f"api0 - Connection time: {endtime - starttime} seconds")
+    return response
+
+def api3(lat, lng):
+    with requests.Session() as session:
+        starttime = time.time()
+        response = session.get(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lng}&aqi=no")
+        endtime = time.time()
+    print(f"api3 - Connection time: {endtime - starttime} seconds")
     return response
 
 def api1(lat, lng):
@@ -31,7 +39,7 @@ def api1(lat, lng):
         starttime = time.time()
         response = session.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true", timeout=timeout)
         endtime = time.time()
-    print(f"api0 - Connection time: {endtime - starttime} seconds")
+    print(f"api1 - Connection time: {endtime - starttime} seconds")
     return response
 
 def api2(lat, lng):
@@ -40,14 +48,6 @@ def api2(lat, lng):
         response = session.get(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lng}&user_ip=remote", timeout=timeout)
         endtime = time.time()
     print(f"api2 - Connection time: {endtime - starttime} seconds")
-    return response
-
-def api3(lat, lng):
-    with requests.Session() as session:
-        starttime = time.time()
-        response = session.get(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lng}&aqi=no", timeout=timeout)
-        endtime = time.time()
-    print(f"api3 - Connection time: {endtime - starttime} seconds")
     return response
 
 def api4(lat, lng):
@@ -84,7 +84,7 @@ def get_weather(city):
     location = requests.get(f"https://nominatim.openstreetmap.org/search?q={city}&format=json")
     loc = location.json()
     print(f"https://nominatim.openstreetmap.org/search?q={city}&format=json")
-    print(json.dumps(loc, indent=2))
+    #print(json.dumps(loc, indent=2))
     try:
         lat = loc[0]["lat"]
     except:
@@ -95,39 +95,44 @@ def get_weather(city):
     processes = [] # Create the paralelism variable array as empty
 
     # Create the poll to manage the process
-    with mp.Pool() as pool:
-        # Loop that get the request for each API
-        for api_func in [api0, api1, api2, api3, api4, api5]:
-            process = pool.apply_async(api_func, args=(lat, lng)) # Create the process to run any "api" funtion
-            processes.append(process) # Append the function to the "processes" array
+    pool = mp.Pool()
+    # Loop to get the request of APIs
+    for api_func in [api0, api3, api2, api1, api4, api5]:
+        process = pool.apply_async(api_func, args=(lat, lng))
+        processes.append(process) # Append the process into the array
 
-        # Use the "GET" method for each element in the "processes" array
-        responses = []
-        for process in processes:
-            try:
-                if process == processes[0]:
-                    response = process.get()
-                else:
-                    response = process.get(timeout=timeout)
-                responses.append(response)
-            except Exception as e:
-                print(f"Error getting response: {e}")
+    # Use GET to each process in processes array
+    responses = []
+    for process in processes:
+        try:
+            if process == processes[0] or process == processes[1]:
+                response = process.get()
+            else:
+                response = process.get(timeout=timeout)
+            responses.append(response)
+        except:
+            print(f"Erro ao obter resposta")
+
+    # Close the pool
+    pool.close()
+    pool.join()
 
     weather_data = []   # Create the weather data array as empty
 
     # Loop for get the data of each element in "responses" array
     for response in responses:
         # Verify if the response of the APIs was successfully done
+        print(response.status_code)
         if response.status_code == 200:
             weather_data.append(response.json()) # Uses the ".json" method to interpret the JSON for Python
         else:
-            print("API ERROR")
+            print(f"API ERROR")
 
     #debug
-    print(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true")
     print(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&exclude=minutely,hourly&units=metric&appid=a855b02b7c3ea7131dc80891d98100fb")
-    print(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lng}&user_ip=remote")
     print(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lng}&aqi=no")
+    print(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true")
+    print(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lng}&user_ip=remote")
     print(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lng}?unitGroup=metric&include=days&key={keys[4]}&contentType=json")
     print(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lng}&apikey={keys[5]}")
     
@@ -141,9 +146,9 @@ def get_weather(city):
     temp_data = []
     temp_index = [
         [0,"current", "temp"],
-        [1,"current_weather", "temperature"],
+        [3,"current_weather", "temperature"],
         [2,"results", "temp"],
-        [3,"current", "temp_c"],
+        [1,"current", "temp_c"],
         [4,"days", 0, "temp"],
         [5,"data", "values", "temperature"]
     ]
@@ -165,7 +170,7 @@ def get_weather(city):
     flike_data = []
     flike_index = [
         [0, "current", "feels_like"],
-        [3, "current", "feelslike_c"],
+        [1, "current", "feelslike_c"],
         [4, "days", 0, "feelslike"],
         [5, "data", "values", "temperatureApparent"]
     ]
@@ -187,8 +192,8 @@ def get_weather(city):
     wspeed_data = []
     wspeed_index = [
         [0, "current", "wind_speed"],
-        [1, "current_weather", "windspeed", "kmph"],
-        [3, "current", "wind_kph", "kmph"],
+        [3, "current_weather", "windspeed", "kmph"],
+        [1, "current", "wind_kph", "kmph"],
         [4, "days", 0, "windspeed", "kmph"],
         [5, "data", "values", "windSpeed"]
     ]
@@ -222,7 +227,7 @@ def get_weather(city):
     humidity_index = [
         [0, "current", "humidity"],
         [2, "results", "humidity"],
-        [3, "current", "humidity"],
+        [1, "current", "humidity"],
         [4, "days", 0, "humidity"],
         [5, "data", "values", "humidity"]
     ]
@@ -299,11 +304,11 @@ def get_weather(city):
     final_api = {
         'location': {
                 'adresstype': loc[0]["addresstype"],
-                'name': weather_data[3]["location"]["name"],
-                'region': weather_data[3]["location"]["region"],
-                'country': weather_data[3]["location"]["country"],
-                'local_time': weather_data[3]["location"]["localtime"],
-                'timezone': weather_data[1]["timezone"],
+                'name': weather_data[1]["location"]["name"],
+                'region': weather_data[1]["location"]["region"],
+                'country': weather_data[1]["location"]["country"],
+                'local_time': weather_data[1]["location"]["localtime"],
+                'timezone': weather_data[0]["timezone"],
                 'dt': weather_data[0]["current"]["dt"]
         },
         'current': {
