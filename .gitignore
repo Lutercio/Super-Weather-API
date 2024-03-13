@@ -5,6 +5,7 @@ Dockerfile
 .gcloudignore
 app.yaml
 __pycache__/
+app.ini
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
