@@ -13,7 +13,7 @@ CORS(app)
 app.json.sort_keys = False
 
 # Keys of acess of the base APIs
-keys = [os.getenv(f"KEY_{i}") for i in range(7)]
+keys = [os.getenv(f"KEY_{i}") for i in range(10)]
 timeout = 5
 
 # Functions to "GET" requests of the base APIs
@@ -66,6 +66,20 @@ def api6(lat, lng):
         endtime = time.time()
     print(f"api6 - Connection time: {endtime - starttime} seconds")
     return response
+def api7(lat, lng):
+    with requests.Session() as session:
+        starttime = time.time()
+        response = session.get(f"https://my.meteoblue.com/packages/current?apikey={keys[7]}&lat={lat}&lon={lng}&asl=56&format=json", timeout=timeout)
+        endtime = time.time()
+    print(f"api7 - Connection time: {endtime - starttime} seconds")
+    return response
+def api8(lat, lng):
+    with requests.Session() as session:
+        starttime = time.time()
+        response = session.get(f"https://api.weatherbit.io/v2.0/current?lat={lat}&lon={lng}&key={keys[8]}", timeout=timeout)
+        endtime = time.time()
+    print(f"api8 - Connection time: {endtime - starttime} seconds")
+    return response
 
 # Main function of the API
 @app.route('/get/?search=<city>')
@@ -97,7 +111,7 @@ def get_weather(city):
     # Create the poll to manage the process
     pool = mp.Pool()
     # Loop to get the request of APIs
-    for api_func in [api0, api3, api2, api1, api4, api5, api6]:
+    for api_func in [api0, api3, api2, api1, api4, api5, api6, api7, api8]:
         process = pool.apply_async(api_func, args=(lat, lng))
         processes.append(process) # Append the process into the array
 
@@ -136,6 +150,8 @@ def get_weather(city):
     print(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lng}?unitGroup=metric&include=days&key={keys[4]}&contentType=json")
     print(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lng}&apikey={keys[5]}")
     print(f"https://www.meteosource.com/api/v1/free/point?lat={lat}&lon={lng}&language=en&sections=current&key={keys[6]}")
+    print(f"https://my.meteoblue.com/packages/current?apikey={keys[7]}&lat={lat}&lon={lng}&asl=56&format=json")
+    print(f"https://api.weatherbit.io/v2.0/current?lat={lat}&lon={lng}&key={keys[8]}")
     
     default_temp = weather_data[0]["current"]["temp"] # Use OpenWeather to compare with other APIs data
     default_flike = weather_data[0]["current"]["feels_like"]
@@ -152,7 +168,9 @@ def get_weather(city):
         [1, "current", "temp_c"],
         [4, "days", 0, "temp"],
         [5, "data", "values", "temperature"],
-        [6, "current", "temperature"]
+        [6, "current", "temperature"],
+        [7, "data_current", "temperature"],
+        [8, "data", 0, "temp"]
     ]
 
     i = 0
@@ -198,7 +216,8 @@ def get_weather(city):
         [1, "current", "wind_kph", "kmph"],
         [4, "days", 0, "windspeed", "kmph"],
         [5, "data", "values", "windSpeed"],
-        [6, "current", "wind", "speed"]
+        [6, "current", "wind", "speed"],
+        [8, "data", 0, "wind_spd"]
     ]
 
     i = 0
