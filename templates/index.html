@@ -3,21 +3,25 @@
 {% block body %}
 
     <h1>
-        Super Weather API
+        Super Weather API <span>(SWAPI)</span>
     </h1>
-    <p>
-        Welcome!
-    </p>
 
     <form action="/get/" method="get">
-        <input autocomplete="off" autofocus placeholder="Local" type="text" name="search">
-        <button type="submit">Pesquisar</button>
+        <input autocomplete="off" autofocus placeholder="Place" type="text" name="search">
+        <button type="submit">Search</button>
     </form>
 
-    <style>
-        body{
-            display:grid;place-items:center;
-        }
-    </style>
+    <ul class="circles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
 
 {% endblock %}
