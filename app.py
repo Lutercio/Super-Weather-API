@@ -337,6 +337,8 @@ def get_weather(city):
             'APIcount': len(weather_data),
             'temperature': round(temperature / apicountT, 2), # Do a arithmetic average of the sum of all temperature data and the number of API data collected
             'feels_like': round(feels_like / apicountFL, 2),
+            'min_temp': weather_data[0]["daily"][0]["temp"]["min"],
+            'max_temp': weather_data[0]["daily"][0]["temp"]["max"],
             'wind_speed': round(wind_speed / apicountWS, 2),
             'sunrise': weather_data[0]["current"]["sunrise"],
             'sunset': weather_data[0]["current"]["sunset"],
@@ -352,23 +354,24 @@ def get_weather(city):
     }
 
     for daily_data in weather_data[0]["daily"]:
-        final_api["daily"].append({
-            'dt': daily_data["dt"],
-            'sunrise': daily_data["sunrise"],
-            'sunset': daily_data["sunset"],
-            'temperature': {
-                'min': daily_data["temp"]["min"],
-                'max': daily_data["temp"]["max"]
-            },
-            'humidity': daily_data["humidity"],
-            'wind_speed': daily_data["wind_speed"],
-            'weather': {
-                'id': daily_data["weather"][0]["id"],
-                'main': daily_data["weather"][0]["main"],
-                'description': daily_data["weather"][0]["description"],
-                'icon': daily_data["weather"][0]["icon"]
-            }
-    })
+        if daily_data != weather_data[0]["daily"][0]:
+            final_api["daily"].append({
+                'dt': daily_data["dt"],
+                'sunrise': daily_data["sunrise"],
+                'sunset': daily_data["sunset"],
+                'temperature': {
+                    'min': daily_data["temp"]["min"],
+                    'max': daily_data["temp"]["max"]
+                },
+                'humidity': daily_data["humidity"],
+                'wind_speed': daily_data["wind_speed"],
+                'weather': {
+                    'id': daily_data["weather"][0]["id"],
+                    'main': daily_data["weather"][0]["main"],
+                    'description': daily_data["weather"][0]["description"],
+                    'icon': daily_data["weather"][0]["icon"]
+                }
+            })
 
     return jsonify(final_api), 200 # Return the JSON version of the "final_api" dict and the conection code 200
 
