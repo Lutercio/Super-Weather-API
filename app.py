@@ -17,66 +17,66 @@ keys = [os.getenv(f"KEY_{i}") for i in range(10)]
 timeout = 5
 
 # Functions to "GET" requests of the base APIs
-def api0(lat, lng):
+def api0(lat, lon):
     with requests.Session() as session:
         starttime = time.time()
-        response = session.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&units=metric&lang=pt_br&exclude=minutely,hourly&appid={keys[1]}")
+        response = session.get(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&units=metric&lang=pt_br&exclude=minutely,hourly&appid={keys[1]}")
         endtime = time.time()
     print(f"api0 - Connection time: {endtime - starttime} seconds")
     return response
-def api3(lat, lng):
+def api3(lat, lon):
     with requests.Session() as session:
         starttime = time.time()
-        response = session.get(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lng}&aqi=no")
+        response = session.get(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lon}&aqi=no")
         endtime = time.time()
     print(f"api3 - Connection time: {endtime - starttime} seconds")
     return response
-def api1(lat, lng):
+def api1(lat, lon):
     with requests.Session() as session:
         starttime = time.time()
-        response = session.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true", timeout=timeout)
+        response = session.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true", timeout=timeout)
         endtime = time.time()
     print(f"api1 - Connection time: {endtime - starttime} seconds")
     return response
-def api2(lat, lng):
+def api2(lat, lon):
     with requests.Session() as session:
         starttime = time.time()
-        response = session.get(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lng}&user_ip=remote", timeout=timeout)
+        response = session.get(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lon}&user_ip=remote", timeout=timeout)
         endtime = time.time()
     print(f"api2 - Connection time: {endtime - starttime} seconds")
     return response
-def api4(lat, lng):
+def api4(lat, lon):
     with requests.Session() as session:
         starttime = time.time()
-        response = session.get(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lng}?unitGroup=metric&include=days&key={keys[4]}&contentType=json", timeout=timeout)
+        response = session.get(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lon}?unitGroup=metric&include=days&key={keys[4]}&contentType=json", timeout=timeout)
         endtime = time.time()
     print(f"api4 - Connection time: {endtime - starttime} seconds")
     return response
-def api5(lat, lng):
+def api5(lat, lon):
     with requests.Session() as session:
         starttime = time.time()
-        response = session.get(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lng}&apikey={keys[5]}", timeout=timeout)
+        response = session.get(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lon}&apikey={keys[5]}", timeout=timeout)
         endtime = time.time()
     print(f"api5 - Connection time: {endtime - starttime} seconds")
     return response
-def api6(lat, lng):
+def api6(lat, lon):
     with requests.Session() as session:
         starttime = time.time()
-        response = session.get(f"https://www.meteosource.com/api/v1/free/point?lat={lat}&lon={lng}&language=en&sections=current&key={keys[6]}", timeout=timeout)
+        response = session.get(f"https://www.meteosource.com/api/v1/free/point?lat={lat}&lon={lon}&language=en&sections=current&key={keys[6]}", timeout=timeout)
         endtime = time.time()
     print(f"api6 - Connection time: {endtime - starttime} seconds")
     return response
-def api7(lat, lng):
+def api7(lat, lon):
     with requests.Session() as session:
         starttime = time.time()
-        response = session.get(f"https://my.meteoblue.com/packages/current?apikey={keys[7]}&lat={lat}&lon={lng}&asl=56&format=json", timeout=timeout)
+        response = session.get(f"https://my.meteoblue.com/packages/current?apikey={keys[7]}&lat={lat}&lon={lon}&asl=56&format=json", timeout=timeout)
         endtime = time.time()
     print(f"api7 - Connection time: {endtime - starttime} seconds")
     return response
-def api8(lat, lng):
+def api8(lat, lon):
     with requests.Session() as session:
         starttime = time.time()
-        response = session.get(f"https://api.weatherbit.io/v2.0/current?lat={lat}&lon={lng}&key={keys[8]}", timeout=timeout)
+        response = session.get(f"https://api.weatherbit.io/v2.0/current?lat={lat}&lon={lon}&key={keys[8]}", timeout=timeout)
         endtime = time.time()
     print(f"api8 - Connection time: {endtime - starttime} seconds")
     return response
@@ -103,8 +103,8 @@ def get_weather(city):
         lat = loc[0]["lat"]
     except:
         return jsonify({'message': "NOT_FOUND"}), 400
-    lng = loc[0]["lon"]
-    print(lat, lng)
+    lon = loc[0]["lon"]
+    print(lat, lon)
 
     processes = [] # Create the paralelism variable array as empty
 
@@ -112,7 +112,7 @@ def get_weather(city):
     pool = mp.Pool()
     # Loop to get the request of APIs
     for api_func in [api0, api3, api2, api1, api4, api5, api6, api7, api8]:
-        process = pool.apply_async(api_func, args=(lat, lng))
+        process = pool.apply_async(api_func, args=(lat, lon))
         processes.append(process) # Append the process into the array
 
     # Use GET to each process in processes array
@@ -143,15 +143,15 @@ def get_weather(city):
             print(f"API ERROR")
 
     #debug
-    print(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&exclude=minutely,hourly&units=metric&appid=a855b02b7c3ea7131dc80891d98100fb")
-    print(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lng}&aqi=no")
-    print(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true")
-    print(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lng}&user_ip=remote")
-    print(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lng}?unitGroup=metric&include=days&key={keys[4]}&contentType=json")
-    print(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lng}&apikey={keys[5]}")
-    print(f"https://www.meteosource.com/api/v1/free/point?lat={lat}&lon={lng}&language=en&sections=current&key={keys[6]}")
-    print(f"https://my.meteoblue.com/packages/current?apikey={keys[7]}&lat={lat}&lon={lng}&asl=56&format=json")
-    print(f"https://api.weatherbit.io/v2.0/current?lat={lat}&lon={lng}&key={keys[8]}")
+    print(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&exclude=minutely,hourly&units=metric&appid=a855b02b7c3ea7131dc80891d98100fb")
+    print(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lon}&aqi=no")
+    print(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true")
+    print(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lon}&user_ip=remote")
+    print(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lon}?unitGroup=metric&include=days&key={keys[4]}&contentType=json")
+    print(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lon}&apikey={keys[5]}")
+    print(f"https://www.meteosource.com/api/v1/free/point?lat={lat}&lon={lon}&language=en&sections=current&key={keys[6]}")
+    print(f"https://my.meteoblue.com/packages/current?apikey={keys[7]}&lat={lat}&lon={lon}&asl=56&format=json")
+    print(f"https://api.weatherbit.io/v2.0/current?lat={lat}&lon={lon}&key={keys[8]}")
     
     default_temp = weather_data[0]["current"]["temp"] # Use OpenWeather to compare with other APIs data
     default_flike = weather_data[0]["current"]["feels_like"]
@@ -376,8 +376,8 @@ def get_weather(city):
     return jsonify(final_api), 200 # Return the JSON version of the "final_api" dict and the conection code 200
 
 
-@app.route('/get/?lat=<lat>&lon=<lng>')
-def get_weather_cord(lat, lng):
+@app.route('/get/?lat=<lat>&lon=<lon>')
+def get_weather_cord(lat, lon):
     #Initialize some variables
     apicountT = 0
     apicountFL = 0
@@ -388,9 +388,9 @@ def get_weather_cord(lat, lng):
     feels_like = 0
     wind_speed = 0
 
-    location = requests.get(f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lng}&format=json")
+    location = requests.get(f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json")
     loc = location.json()
-    print(f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lng}&format=json")
+    print(f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json")
 
     processes = [] # Create the paralelism variable array as empty
 
@@ -398,7 +398,7 @@ def get_weather_cord(lat, lng):
     pool = mp.Pool()
     # Loop to get the request of APIs
     for api_func in [api0, api3, api2, api1, api4, api5, api6, api7, api8]:
-        process = pool.apply_async(api_func, args=(lat, lng))
+        process = pool.apply_async(api_func, args=(lat, lon))
         processes.append(process) # Append the process into the array
 
     # Use GET to each process in processes array
@@ -429,15 +429,15 @@ def get_weather_cord(lat, lng):
             print(f"API ERROR")
 
     #debug
-    print(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&exclude=minutely,hourly&units=metric&appid=a855b02b7c3ea7131dc80891d98100fb")
-    print(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lng}&aqi=no")
-    print(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true")
-    print(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lng}&user_ip=remote")
-    print(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lng}?unitGroup=metric&include=days&key={keys[4]}&contentType=json")
-    print(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lng}&apikey={keys[5]}")
-    print(f"https://www.meteosource.com/api/v1/free/point?lat={lat}&lon={lng}&language=en&sections=current&key={keys[6]}")
-    print(f"https://my.meteoblue.com/packages/current?apikey={keys[7]}&lat={lat}&lon={lng}&asl=56&format=json")
-    print(f"https://api.weatherbit.io/v2.0/current?lat={lat}&lon={lng}&key={keys[8]}")
+    print(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lon}&exclude=minutely,hourly&units=metric&appid=a855b02b7c3ea7131dc80891d98100fb")
+    print(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lon}&aqi=no")
+    print(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true")
+    print(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lon}&user_ip=remote")
+    print(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lon}?unitGroup=metric&include=days&key={keys[4]}&contentType=json")
+    print(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lon}&apikey={keys[5]}")
+    print(f"https://www.meteosource.com/api/v1/free/point?lat={lat}&lon={lon}&language=en&sections=current&key={keys[6]}")
+    print(f"https://my.meteoblue.com/packages/current?apikey={keys[7]}&lat={lat}&lon={lon}&asl=56&format=json")
+    print(f"https://api.weatherbit.io/v2.0/current?lat={lat}&lon={lon}&key={keys[8]}")
     
     default_temp = weather_data[0]["current"]["temp"] # Use OpenWeather to compare with other APIs data
     default_flike = weather_data[0]["current"]["feels_like"]
@@ -665,11 +665,11 @@ def get_weather_cord(lat, lng):
 def get_html():
     index_city = request.args.get("search")
     lat = request.args.get("lat")
-    lng = request.args.get("lon")
+    lon = request.args.get("lon")
     if index_city != None:
         return get_weather(index_city)
-    elif lat is not None and lng is not None:
-        return get_weather_cord(lat, lng)
+    elif lat is not None and lon is not None:
+        return get_weather_cord(lat, lon)
     return home()
 
 @app.route("/ip")
