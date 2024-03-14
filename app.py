@@ -375,11 +375,301 @@ def get_weather(city):
 
     return jsonify(final_api), 200 # Return the JSON version of the "final_api" dict and the conection code 200
 
+
+@app.route('/get/?lat=<lat>&lon=<lng>')
+def get_weather_cord(lat, lng):
+    #Initialize some variables
+    apicountT = 0
+    apicountFL = 0
+    apicountWS = 0
+    apicountH = 0
+    temperature = 0
+    humidity = 0
+    feels_like = 0
+    wind_speed = 0
+
+    location = requests.get(f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lng}&format=json")
+    loc = location.json()
+    print(f"https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lng}&format=json")
+
+    processes = [] # Create the paralelism variable array as empty
+
+    # Create the poll to manage the process
+    pool = mp.Pool()
+    # Loop to get the request of APIs
+    for api_func in [api0, api3, api2, api1, api4, api5, api6, api7, api8]:
+        process = pool.apply_async(api_func, args=(lat, lng))
+        processes.append(process) # Append the process into the array
+
+    # Use GET to each process in processes array
+    responses = []
+    for process in processes:
+        try:
+            if process == processes[0] or process == processes[1]:
+                response = process.get()
+            else:
+                response = process.get(timeout=timeout)
+            responses.append(response)
+        except:
+            print(f"Erro ao obter resposta")
+
+    # Close the pool
+    pool.close()
+    pool.join()
+
+    weather_data = []   # Create the weather data array as empty
+
+    # Loop for get the data of each element in "responses" array
+    for response in responses:
+        # Verify if the response of the APIs was successfully done
+        print(response.status_code)
+        if response.status_code == 200:
+            weather_data.append(response.json()) # Uses the ".json" method to interpret the JSON for Python
+        else:
+            print(f"API ERROR")
+
+    #debug
+    print(f"https://api.openweathermap.org/data/3.0/onecall?lat={lat}&lon={lng}&exclude=minutely,hourly&units=metric&appid=a855b02b7c3ea7131dc80891d98100fb")
+    print(f"http://api.weatherapi.com/v1/current.json?key={keys[3]}&q={lat},{lng}&aqi=no")
+    print(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lng}&current_weather=true")
+    print(f"https://api.hgbrasil.com/weather?key=SUA-CHAVE&lat={lat}2&lon={lng}&user_ip=remote")
+    print(f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{lat}%2C%20{lng}?unitGroup=metric&include=days&key={keys[4]}&contentType=json")
+    print(f"https://api.tomorrow.io/v4/weather/realtime?location={lat},{lng}&apikey={keys[5]}")
+    print(f"https://www.meteosource.com/api/v1/free/point?lat={lat}&lon={lng}&language=en&sections=current&key={keys[6]}")
+    print(f"https://my.meteoblue.com/packages/current?apikey={keys[7]}&lat={lat}&lon={lng}&asl=56&format=json")
+    print(f"https://api.weatherbit.io/v2.0/current?lat={lat}&lon={lng}&key={keys[8]}")
+    
+    default_temp = weather_data[0]["current"]["temp"] # Use OpenWeather to compare with other APIs data
+    default_flike = weather_data[0]["current"]["feels_like"]
+    default_wspeed = weather_data[0]["current"]["wind_speed"]
+    default_humidity = weather_data[0]["current"]["humidity"]
+    margin = 3 # Define a margin
+
+    #Collect the data into some matrizes with an Error Handler in case of Error
+    temp_data = []
+    temp_index = [
+        [0, "current", "temp"],
+        [3, "current_weather", "temperature"],
+        [2, "results", "temp"],
+        [1, "current", "temp_c"],
+        [4, "days", 0, "temp"],
+        [5, "data", "values", "temperature"],
+        [6, "current", "temperature"],
+        [7, "data_current", "temperature"],
+        [8, "data", 0, "temp"]
+    ]
+
+    i = 0
+    while i < len(temp_index):
+        if len(temp_index[i]) == 3:
+            try:
+                temp_data.append(weather_data[temp_index[i][0]][temp_index[i][1]][temp_index[i][2]])
+            except:
+                None
+        else:
+            try:
+                temp_data.append(weather_data[temp_index[i][0]][temp_index[i][1]][temp_index[i][2]][temp_index[i][3]])
+            except:
+                None
+        i += 1
+
+    flike_data = []
+    flike_index = [
+        [0, "current", "feels_like"],
+        [1, "current", "feelslike_c"],
+        [4, "days", 0, "feelslike"],
+        [5, "data", "values", "temperatureApparent"]
+    ]
+
+    i = 0
+    while i < len(flike_index):
+        if len(flike_index[i]) == 3:
+            try:
+                flike_data.append(weather_data[flike_index[i][0]][flike_index[i][1]][flike_index[i][2]])
+            except:
+                None
+        else:
+            try:
+                flike_data.append(weather_data[flike_index[i][0]][flike_index[i][1]][flike_index[i][2]][flike_index[i][3]])
+            except:
+                None
+        i += 1
+
+    wspeed_data = []
+    wspeed_index = [
+        [0, "current", "wind_speed"],
+        [3, "current_weather", "windspeed", "kmph"],
+        [1, "current", "wind_kph", "kmph"],
+        [4, "days", 0, "windspeed", "kmph"],
+        [5, "data", "values", "windSpeed"],
+        [6, "current", "wind", "speed"],
+        [8, "data", 0, "wind_spd"]
+    ]
+
+    i = 0
+    while i < len(wspeed_index):
+        if "kmph" in wspeed_index[i]:
+            if len(wspeed_index[i]) == 4:
+                try:
+                    wspeed_data.append(weather_data[wspeed_index[i][0]][wspeed_index[i][1]][wspeed_index[i][2]] / 3.6)
+                except:
+                    None
+            else:
+                try:
+                    wspeed_data.append(weather_data[wspeed_index[i][0]][wspeed_index[i][1]][wspeed_index[i][2]][wspeed_index[i][3]] / 3.6)
+                except:
+                    None
+        elif len(wspeed_index[i]) == 3:
+            try:
+                wspeed_data.append(weather_data[wspeed_index[i][0]][wspeed_index[i][1]][wspeed_index[i][2]])
+            except:
+                None
+        else:
+            try:
+                wspeed_data.append(weather_data[wspeed_index[i][0]][wspeed_index[i][1]][wspeed_index[i][2]][wspeed_index[i][3]])
+            except:
+                None
+        i += 1
+
+    humidity_data = []
+    humidity_index = [
+        [0, "current", "humidity"],
+        [2, "results", "humidity"],
+        [1, "current", "humidity"],
+        [4, "days", 0, "humidity"],
+        [5, "data", "values", "humidity"]
+    ]
+
+    i = 0
+    while i < len(humidity_index):
+        if len(humidity_index[i]) == 3:
+            try:
+                humidity_data.append(weather_data[humidity_index[i][0]][humidity_index[i][1]][humidity_index[i][2]])
+            except:
+                None
+        else:
+            try:
+                humidity_data.append(weather_data[humidity_index[i][0]][humidity_index[i][1]][humidity_index[i][2]][humidity_index[i][3]])
+            except:
+                None
+        i += 1
+
+    #Compare the data with a margin and print them for debug
+    print("--------------------")
+    print("Temperature")
+
+    i = 0
+    while i < len(temp_data):
+        if temp_data[i] > default_temp - margin and temp_data[i] < default_temp + margin:
+            temperature += temp_data[i]
+            apicountT += 1
+            print(temp_data[i])
+        else:
+            print(f"API{i} T FAIL ({temp_data[i]})")
+        i += 1
+
+    print("--------------------")
+    print("Feels Like")
+
+    i = 0
+    while i < len(flike_data):
+        if flike_data[i] > default_flike - margin and flike_data[i] < default_flike + margin:
+            feels_like += flike_data[i]
+            apicountFL += 1
+            print(flike_data[i])
+        else:
+            print(f"API{i} FL FAIL ({flike_data[i]})")
+        i += 1
+
+    print("--------------------")
+    print("Wind Speed")
+    
+    i = 0
+    while i < len(wspeed_data):
+        if wspeed_data[i] > default_wspeed - margin and wspeed_data[i] < default_wspeed + margin:
+            wind_speed += wspeed_data[i]
+            apicountWS += 1
+            print(round(wspeed_data[i], 2))
+        else:
+            print(f"API{i} WS FAIL ({round(wspeed_data[i], 2)})")
+        i += 1
+
+    print("--------------------")
+    print("Humidity")
+    
+    i = 0
+    while i < len(humidity_data):
+        if humidity_data[i] > default_humidity - margin * 3 and humidity_data[i] < default_humidity + margin * 3:
+            humidity += humidity_data[i]
+            apicountH += 1
+            print(humidity_data[i])
+        else:
+            print(f"API{i} H FAIL ({humidity_data[i]})")
+        i += 1
+
+
+    # Data that will be returned
+    final_api = {
+        'location': {
+                'adresstype': loc["addresstype"],
+                'name': weather_data[1]["location"]["name"],
+                'region': weather_data[1]["location"]["region"],
+                'country': weather_data[1]["location"]["country"],
+                'local_time': weather_data[1]["location"]["localtime"],
+                'timezone': weather_data[0]["timezone"],
+                'dt': weather_data[0]["current"]["dt"]
+        },
+        'current': {
+            'APIcount': len(weather_data),
+            'temperature': round(temperature / apicountT, 2), # Do a arithmetic average of the sum of all temperature data and the number of API data collected
+            'feels_like': round(feels_like / apicountFL, 2),
+            'min_temp': weather_data[0]["daily"][0]["temp"]["min"],
+            'max_temp': weather_data[0]["daily"][0]["temp"]["max"],
+            'wind_speed': round(wind_speed / apicountWS, 2),
+            'sunrise': weather_data[0]["current"]["sunrise"],
+            'sunset': weather_data[0]["current"]["sunset"],
+            'humidity': round(humidity / apicountH, 2),
+            'clouds': weather_data[0]["current"]["clouds"],
+            'weather':{
+                'id': weather_data[0]["current"]["weather"][0]["id"],
+                'main': weather_data[0]["current"]["weather"][0]["main"],
+                'description': weather_data[0]["current"]["weather"][0]["description"]
+            }
+        },
+        'daily': []
+    }
+
+    for daily_data in weather_data[0]["daily"]:
+        if daily_data != weather_data[0]["daily"][0]:
+            final_api["daily"].append({
+                'dt': daily_data["dt"],
+                'sunrise': daily_data["sunrise"],
+                'sunset': daily_data["sunset"],
+                'temperature': {
+                    'min': daily_data["temp"]["min"],
+                    'max': daily_data["temp"]["max"]
+                },
+                'humidity': daily_data["humidity"],
+                'wind_speed': daily_data["wind_speed"],
+                'weather': {
+                    'id': daily_data["weather"][0]["id"],
+                    'main': daily_data["weather"][0]["main"],
+                    'description': daily_data["weather"][0]["description"],
+                    'icon': daily_data["weather"][0]["icon"]
+                }
+            })
+
+    return jsonify(final_api), 200 # Return the JSON version of the "final_api" dict and the conection code 200
+
 @app.route('/get/')
 def get_html():
     index_city = request.args.get("search")
+    lat = request.args.get("lat")
+    lng = request.args.get("lon")
     if index_city != None:
         return get_weather(index_city)
+    elif lat is not None and lng is not None:
+        return get_weather_cord(lat, lng)
     return home()
 
 @app.route("/ip")
