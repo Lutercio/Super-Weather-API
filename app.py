@@ -24,7 +24,6 @@ def api0(lat, lng):
         endtime = time.time()
     print(f"api0 - Connection time: {endtime - starttime} seconds")
     return response
-
 def api3(lat, lng):
     with requests.Session() as session:
         starttime = time.time()
@@ -32,7 +31,6 @@ def api3(lat, lng):
         endtime = time.time()
     print(f"api3 - Connection time: {endtime - starttime} seconds")
     return response
-
 def api1(lat, lng):
     with requests.Session() as session:
         starttime = time.time()
@@ -40,7 +38,6 @@ def api1(lat, lng):
         endtime = time.time()
     print(f"api1 - Connection time: {endtime - starttime} seconds")
     return response
-
 def api2(lat, lng):
     with requests.Session() as session:
         starttime = time.time()
@@ -48,7 +45,6 @@ def api2(lat, lng):
         endtime = time.time()
     print(f"api2 - Connection time: {endtime - starttime} seconds")
     return response
-
 def api4(lat, lng):
     with requests.Session() as session:
         starttime = time.time()
@@ -56,7 +52,6 @@ def api4(lat, lng):
         endtime = time.time()
     print(f"api4 - Connection time: {endtime - starttime} seconds")
     return response
-
 def api5(lat, lng):
     with requests.Session() as session:
         starttime = time.time()
@@ -64,7 +59,6 @@ def api5(lat, lng):
         endtime = time.time()
     print(f"api5 - Connection time: {endtime - starttime} seconds")
     return response
-
 def api6(lat, lng):
     with requests.Session() as session:
         starttime = time.time()
@@ -72,7 +66,6 @@ def api6(lat, lng):
         endtime = time.time()
     print(f"api6 - Connection time: {endtime - starttime} seconds")
     return response
-
 
 # Main function of the API
 @app.route('/get/?search=<city>')
